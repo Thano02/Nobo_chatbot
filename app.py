@@ -9,20 +9,20 @@ st.set_page_config(
 )
 
 # Logo / Titre
-st.title("🏕️ Nobo House Camp — Assistant Doc")
-st.markdown("Pose une question sur les infos du camp (planning, repas, logistique, etc.).")
+st.title("🏕️ Nobo House Camp — Assistant")
+st.markdown("Have a question about the camp? (Schedule, meals, logistics, etc.)")
 
 # Zone de saisie utilisateur
-question = st.text_input("❓ Que veux-tu savoir ?")
+question = st.text_input("❓ What would you like to know?")
 
 if question:
-    with st.spinner("Réflexion en cours... 🤔"):
+    with st.spinner("🧠 Bit of playa dust in the brain… but i'm thinking... 🤔"):
         try:
             response, sources = ask_gpt_rag(question)
-            st.markdown("### 🤖 Réponse :")
+            st.markdown("### 🤖 Answer :")
             st.success(response)
 
-            with st.expander("📄 Sources utilisées :"):
+            with st.expander("📄 References :"):
                 for src in sources:
                     st.markdown(f"- `{src}`")
 
