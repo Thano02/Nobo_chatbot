@@ -1,24 +1,38 @@
+import os
 import pickle
 from sentence_transformers import SentenceTransformer
 from openai import OpenAI
 from sklearn.neighbors import NearestNeighbors
 
 # 🔐 Clé via variable d’environnement
-import os
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
-# Chargement des données vectorielles
-with open("all_texts.pkl", "rb") as f:
+# 📁 Dossier courant (emplacement de ce fichier)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# 📦 Chemins des fichiers
+TEXTS_PATH = os.path.join(CURRENT_DIR, "all_texts.pkl")
+SOURCES_PATH = os.path.join(CURRENT_DIR, "all_sources.pkl")
+EMBEDDINGS_PATH = os.path.join(CURRENT_DIR, "all_embeddings.pkl")
+
+# 🔍 Chargement des fichiers
+for path in [TEXTS_PATH, SOURCES_PATH, EMBEDDINGS_PATH]:
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"❌ Fichier introuvable : {path}")
+
+with open(TEXTS_PATH, "rb") as f:
     all_texts = pickle.load(f)
-with open("all_sources.pkl", "rb") as f:
+
+with open(SOURCES_PATH, "rb") as f:
     all_sources = pickle.load(f)
-with open("all_embeddings.pkl", "rb") as f:
+
+with open(EMBEDDINGS_PATH, "rb") as f:
     embeddings = pickle.load(f)
 
-# Recharger le modèle d'embedding
+# 🚀 Modèle d'embedding
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
-# Index sklearn
+# 🔍 Index sklearn
 nn = NearestNeighbors(n_neighbors=6, metric='cosine')
 nn.fit(embeddings)
 
@@ -31,8 +45,14 @@ def ask_gpt_rag(question, k=6):
 
     context = "\n\n".join(chunks)
     messages = [
-        {"role": "system", "content": "Tu es un assistant utile pour le camp Nobo House. Réponds uniquement en t'appuyant sur le contexte fourni."},
-        {"role": "user", "content": f"{context}\n\nQuestion : {question}"}
+        {
+            "role": "system",
+            "content": "Tu es un assistant utile pour le camp Nobo House. Réponds uniquement en t'appuyant sur le contexte fourni."
+        },
+        {
+            "role": "user",
+            "content": f"{context}\n\nQuestion : {question}"
+        }
     ]
 
     response = client.chat.completions.create(
